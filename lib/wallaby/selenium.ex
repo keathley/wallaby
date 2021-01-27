@@ -25,6 +25,17 @@ defmodule Wallaby.Selenium do
     ]
   ```
 
+  ### Selenium url
+
+  You are able to setup selenium location. By default it is http://localhost:4444/wd/hub/
+
+  ```
+  config :wallaby,
+    selenium: [
+      remote_url: "http://selenium_url"
+    ]
+  ```
+
   ## Default Capabilities
 
   By default, Selenium will use the following capabilities
@@ -87,7 +98,7 @@ defmodule Wallaby.Selenium do
   @doc false
   @spec start_session([start_session_opts]) :: Wallaby.Driver.on_start_session() | no_return
   def start_session(opts \\ []) do
-    base_url = Keyword.get(opts, :remote_url, "http://localhost:4444/wd/hub/")
+    base_url = Keyword.get(opts, :remote_url, remote_url_from_config())
     capabilities = Keyword.get(opts, :capabilities, capabilities_from_config())
 
     with {:ok, response} <- WebdriverClient.create_session(base_url, capabilities) do
@@ -113,6 +124,13 @@ defmodule Wallaby.Selenium do
     |> Application.get_env(:selenium, [])
     |> Keyword.get(:capabilities, default_capabilities())
   end
+
+  defp remote_url_from_config() do
+    :wallaby
+    |> Application.get_env(:selenium, [])
+    |> Keyword.get(:remote_url, "http://localhost:4444/wd/hub/")
+  end
+
 
   @doc false
   @spec end_session(Session.t()) :: :ok
